@@ -1,0 +1,21 @@
+suite:
+  name: Replay example
+  pass_threshold: 1
+targets:
+  - name: recorded
+    type: replay
+    file: replay.jsonl
+cases:
+  - name: order identifier
+    prompt: Find order {{order}}
+    input: { order: ORD-12345 }
+    checks:
+      - { kind: includes, value: ORD-12345 }
+      - { kind: json_valid }
+      - kind: json_shape
+        value:
+          type: object
+          required: [order, status]
+          properties:
+            order: { type: string }
+            status: { enum: [shipped, pending] }

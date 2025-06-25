@@ -1,0 +1,1 @@
+{"case":"order identifier","output":"{\"order\":\"ORD-12345\",\"status\":\"shipped\"}","latency_ms":18,"cost_usd":0.0001}
