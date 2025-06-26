@@ -1,0 +1,28 @@
+name: Replay evaluation
+
+on:
+  pull_request:
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo build --release -p evalgate-cli
+      - name: Run replay suite
+        run: target/release/evalgate run examples/suite.yaml --format json --output current.json
+      - name: Write JUnit report
+        if: always()
+        run: target/release/evalgate run examples/suite.yaml --format junit --output evalgate.xml
+      - name: Compare baseline
+        if: always() && hashFiles('examples/baseline.json') != ''
+        run: target/release/evalgate compare examples/baseline.json current.json --format markdown | tee comparison.md
+      - name: Add job summary
+        if: always()
+        run: |
+          if test -f comparison.md; then
+            cat comparison.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            printf '# Evalgate\n\nReplay suite completed. No baseline file was present.\n' >> "$GITHUB_STEP_SUMMARY"
+          fi
